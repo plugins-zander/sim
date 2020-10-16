@@ -29,14 +29,14 @@
 			</div>
 
 			<div id="value_section">
-				<div class="field_title centered">Value</div>
+				<div class="field_title centered">Value | 值</div>
 				<input id="float_value_field" class="monospace" maxlength="64">
 			</div>
 
 			<div class="separator"></div>
 
 			<div id="bits_section">
-				<div class="field_title centered">Bit Pattern</div>
+				<div class="field_title centered">Bit Pattern | 位模式</div>
 				<div id="bits_container" class="non_selectable"></div>
 			</div>
 
@@ -53,7 +53,7 @@
 
 
 			<div id="slider_section">
-				<div class="field_title centered">Position within Significand–Exponent Range</div>
+				<div class="field_title centered">Position within Significand–Exponent Range | 在有效指数范围内的位置</div>
 				<div class="spacer_big"></div>
 				<div id="slider_container" class="non_selectable">
 					<div id="mant_gutter_min" class="chart_label">0</div>
@@ -83,20 +83,20 @@
 
 			<div class="separator"></div>
 
-			<div class="field_title centered">Evaluation in Base-2</div>
+			<div class="field_title centered">Evaluation in Base-2 | 以2为底</div>
 
 			<div class="components_container monospace evaluation">(&minus;1)<sup><span id="sign_2_component" class="float_sign"></span></sup>&#215;&#8203;10<sup>(<span
 					 id="exponent_2_component" class="float_exponent"></span>&nbsp;&minus;&nbsp;<span id="exponent_2_bias"></span>)</sup>&#8203;&#215;&#8203;<span
 				 id="implicit_bit_2_component"></span>.<span id="mantissa_2_component" class="float_mantissa"></span>
 			</div>
 
-			<div class="field_title centered">Evaluation in Base-10</div>
+			<div class="field_title centered">Evaluation in Base-10 | 以10为底</div>
 
 			<div class="components_container monospace evaluation"><span id="sign_10_component"></span>&#215;&#8203;2<sup><span
 					 id="exponent_10_component"></span></sup>&#215;&#8203;<span id="implicit_bit_10_component"></span>.<span id="mantissa_10_component"></span>
 			</div>
 
-			<div class="field_title centered">Exact Base-10 Value</div>
+			<div class="field_title centered">Exact Base-10 Value | 以10为底(精确后)</div>
 			<div class="components_container exact_value monospace">
 				<span id="exact_10"></span>
 			</div>
@@ -107,14 +107,14 @@
 
 
 			<div id="next_prev_delta_container">
-				<div class="field_title centered">Delta to Next/Previous Representable Value</div>
+				<div class="field_title centered">Delta to Next/Previous Representable Value | 下一个/上一个可表示值的增量</div>
 				<div class="components_container exact_value monospace">
 					<span id="next_prev_delta"></span>
 				</div>
 			</div>
 
 			<div id="next_delta_container">
-				<div class="field_title centered">Delta to Next Representable Value</div>
+				<div class="field_title centered">Delta to Next Representable Value | 下一个可表示值的增量</div>
 				<div class="components_container exact_value monospace">
 					<span id="next_delta"></span>
 				</div>
@@ -131,7 +131,7 @@
 
 
 		</div>
-		<div id="footer"><a href="index_cn.html">CN</a> | Copy From <a href="https://float.exposed/">float.exposed</a> | Copyright &copy; 2019 &ndash; <a href="https://ciechanow.ski/exposing-floating-point/">Bartosz Ciechanowski</a></div>
+		<div id="footer"><a href="index.html">EN</a> | Copy From <a href="https://float.exposed/">float.exposed</a> | Copyright &copy; 2019 &ndash; <a href="https://ciechanow.ski/exposing-floating-point/">Bartosz Ciechanowski</a></div>
 
 		<div style="overflow: hidden; position: relative; margin:0; padding:0">
 			<div id="measure_div">A</div>
@@ -157,12 +157,12 @@
 		var PERCENT_A_INDEX = 5;
 
 		var titles = [];
-		titles[SIGN_INDEX] = "Sign";
-		titles[EXPONENT_INDEX] = "Exponent";
-		titles[MANTISSA_INDEX] = "Significand";
-		titles[RAW_HEX_VALUE_INDEX] = "Raw Hexadecimal Integer Value";
-		titles[RAW_DECIMAL_VALUE_INDEX] = "Raw Decimal Integer Value";
-		titles[PERCENT_A_INDEX] = "Hexadecimal Form (\"%a\")";
+		titles[SIGN_INDEX] = "Sign <br /> 符号位";
+		titles[EXPONENT_INDEX] = "Exponent <br /> 指数";
+		titles[MANTISSA_INDEX] = "Significand <br /> 尾数";
+		titles[RAW_HEX_VALUE_INDEX] = "Raw Hexadecimal Integer Value <br /> 原始十六进制整数值";
+		titles[RAW_DECIMAL_VALUE_INDEX] = "Raw Decimal Integer Value <br /> 原始十进制整数值";
+		titles[PERCENT_A_INDEX] = "Hexadecimal Form <br /> 十六进制形式 (\"%a\")";
 
 
 		var main_field = document.getElementById("float_value_field");
