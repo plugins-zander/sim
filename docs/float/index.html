@@ -1,0 +1,974 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="index.css">
+	<title>
+		Float Exposed
+	</title>
+	<meta name="author" content="Bartosz Ciechanowski">
+	<meta name="keywords" content="float,bit,binary,floating,point,double,bfloat,fp32,ieee,754,sign,exponent,mantissa,significand">
+	<meta name="description" content="Floating point binary format explorer.">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<script src="Float.js"></script>
+
+</head>
+
+<body>
+	<div id="container">
+		<div id="body">
+
+			<div id="mode_section">
+				<span class="mode_button left_round non_selectable" id="fp16">half</span><span class="mode_button non_selectable"
+				id="bf16">bfloat</span><span class="mode_button non_selectable"
+				 id="fp32">float</span><span class="mode_button right_round non_selectable" id="fp64">double</span>
+			</div>
+
+			<div id="value_section">
+				<div class="field_title centered">Value</div>
+				<input id="float_value_field" class="monospace" maxlength="64">
+			</div>
+
+			<div class="separator"></div>
+
+			<div id="bits_section">
+				<div class="field_title centered">Bit Pattern</div>
+				<div id="bits_container" class="non_selectable"></div>
+			</div>
+
+			<div class="separator"></div>
+
+			<div id="values">
+				<div id="column_container">
+					<div id="column0" class="column"></div>
+					<div id="column1" class="column"></div>
+				</div>
+			</div>
+
+			<div class="separator"></div>
+
+
+			<div id="slider_section">
+				<div class="field_title centered">Position within Significand–Exponent Range</div>
+				<div class="spacer_big"></div>
+				<div id="slider_container" class="non_selectable">
+					<div id="mant_gutter_min" class="chart_label">0</div>
+					<div id="mant_gutter_max" class="chart_label">2<sup>52</sup>-1</div>
+					<div id="slider_gutter_min" class="slider_gutter">
+						<div class="chart_label slider_label">0</div>
+					</div>
+					<div class="spacer_big"></div>
+					<div class="slider_gutter">
+						<div class="chart_label slider_label">1</div>
+					</div>
+					<div id="chart"></div>
+					<div class="slider_gutter">
+						<div class="chart_label slider_label" id="slider_label_max_less_one">30</div>
+					</div>
+					<div class="spacer_big"></div>
+					<div id="slider_gutter_max" class="slider_gutter">
+						<div class="chart_label slider_label" id="slider_label_max">30</div>
+					</div>
+					<div id="exp_notch0" class="exp_notch"></div>
+					<div id="exp_notch1" class="exp_notch"></div>
+					<div id="mant_notch0" class="mant_notch"></div>
+					<div id="mant_notch1" class="mant_notch"></div>
+					<div id="slider_knob"></div>
+				</div>
+			</div>
+
+			<div class="separator"></div>
+
+			<div class="field_title centered">Evaluation in Base-2</div>
+
+			<div class="components_container monospace evaluation">(&minus;1)<sup><span id="sign_2_component" class="float_sign"></span></sup>&#215;&#8203;10<sup>(<span
+					 id="exponent_2_component" class="float_exponent"></span>&nbsp;&minus;&nbsp;<span id="exponent_2_bias"></span>)</sup>&#8203;&#215;&#8203;<span
+				 id="implicit_bit_2_component"></span>.<span id="mantissa_2_component" class="float_mantissa"></span>
+			</div>
+
+			<div class="field_title centered">Evaluation in Base-10</div>
+
+			<div class="components_container monospace evaluation"><span id="sign_10_component"></span>&#215;&#8203;2<sup><span
+					 id="exponent_10_component"></span></sup>&#215;&#8203;<span id="implicit_bit_10_component"></span>.<span id="mantissa_10_component"></span>
+			</div>
+
+			<div class="field_title centered">Exact Base-10 Value</div>
+			<div class="components_container exact_value monospace">
+				<span id="exact_10"></span>
+			</div>
+
+			<div class="spacer"></div>
+
+			<div class="separator"></div>
+
+
+			<div id="next_prev_delta_container">
+				<div class="field_title centered">Delta to Next/Previous Representable Value</div>
+				<div class="components_container exact_value monospace">
+					<span id="next_prev_delta"></span>
+				</div>
+			</div>
+
+			<div id="next_delta_container">
+				<div class="field_title centered">Delta to Next Representable Value</div>
+				<div class="components_container exact_value monospace">
+					<span id="next_delta"></span>
+				</div>
+			</div>
+
+			<div id="prev_delta_container">
+				<div class="field_title centered">Delta to Previous Representable Value</div>
+				<div class="components_container exact_value monospace">
+					<span id="prev_delta"></span>
+				</div>
+			</div>
+
+			<div class="spacer"></div>
+
+
+		</div>
+		<div id="footer">Copyright &copy; 2019 &ndash; <a href="https://ciechanow.ski/exposing-floating-point/">Bartosz Ciechanowski</a></div>
+
+		<div style="overflow: hidden; position: relative; margin:0; padding:0">
+			<div id="measure_div">A</div>
+		</div>
+	</div>
+
+	<script>
+
+
+
+		var max_values = [];
+
+		var config;
+		var float;
+
+		var local = false;
+
+		var SIGN_INDEX = 0;
+		var EXPONENT_INDEX = 1;
+		var MANTISSA_INDEX = 2;
+		var RAW_HEX_VALUE_INDEX = 3;
+		var RAW_DECIMAL_VALUE_INDEX = 4;
+		var PERCENT_A_INDEX = 5;
+
+		var titles = [];
+		titles[SIGN_INDEX] = "Sign";
+		titles[EXPONENT_INDEX] = "Exponent";
+		titles[MANTISSA_INDEX] = "Significand";
+		titles[RAW_HEX_VALUE_INDEX] = "Raw Hexadecimal Integer Value";
+		titles[RAW_DECIMAL_VALUE_INDEX] = "Raw Decimal Integer Value";
+		titles[PERCENT_A_INDEX] = "Hexadecimal Form (\"%a\")";
+
+
+		var main_field = document.getElementById("float_value_field");
+		var knob = document.getElementById("slider_knob");
+		var mant_notch0 = document.getElementById("mant_notch0");
+		var mant_notch1 = document.getElementById("mant_notch1");
+		var exp_notch0 = document.getElementById("exp_notch0");
+		var exp_notch1 = document.getElementById("exp_notch1");
+
+		var chart = document.getElementById("chart");
+		var min_gutter = document.getElementById("slider_gutter_min");
+		var max_gutter = document.getElementById("slider_gutter_max");
+
+		var mode_buttons = [document.getElementById("fp16"), document.getElementById("bf16"), document.getElementById("fp32"), document.getElementById("fp64")]
+		var bit_labels = [];
+		var bit_markers = [];
+		var row_fields = [];
+		var plus_buttons = [];
+		var minus_buttons = [];
+
+
+		var hold_interval_id;
+		var initial_hold_interval_id;
+
+		var update_url;
+
+		setup();
+
+		function set_config(new_config) {
+			if (config != new_config) {
+
+				config = new_config;
+
+				float = Float.from_string(float.to_string(), config);
+
+				max_values[SIGN_INDEX] = BigNum.one();
+				max_values[EXPONENT_INDEX] = config.max_exp;
+				max_values[MANTISSA_INDEX] = config.max_mant;
+				max_values[RAW_HEX_VALUE_INDEX] = config.max_val;
+				max_values[RAW_DECIMAL_VALUE_INDEX] = max_values[RAW_HEX_VALUE_INDEX];
+
+				document.getElementById("slider_label_max_less_one").innerHTML = config.max_exp.sub(1).toString();
+				document.getElementById("slider_label_max").innerHTML = config.max_exp.toString();
+				document.getElementById("mant_gutter_max").innerHTML = "2<sup>" + config.mant_width + "</sup>&minus;1";
+
+
+				reload_bits();
+
+				id = "slider_label_max_less_one"
+
+				for (var i = 0; i < mode_buttons.length; i++)
+					mode_buttons[i].classList.remove("on");
+
+				if (config == fp16)
+					mode_buttons[0].classList.add("on");
+				else if (config == bf16)
+					mode_buttons[1].classList.add("on");
+				else if (config == fp32)
+					mode_buttons[2].classList.add("on");
+				else if (config == fp64)
+					mode_buttons[3].classList.add("on");
+			}
+		}
+
+		function reload_bits() {
+			var bits_container = document.getElementById("bits_container");
+
+			while (bits_container.firstChild)
+				bits_container.removeChild(bits_container.firstChild);
+
+			bit_labels = [];
+			bit_markers = [];
+
+			var bits = 0;
+
+			var quad_bytes = Math.ceil(config.total_width / 32);
+			var double_bytes = Math.ceil((config.total_width / 16) / quad_bytes);
+
+			for (var i = 0; i < quad_bytes; i++) {
+
+				var quad_byte = document.createElement("div");
+				quad_byte.classList.add("double_byte");
+				for (var j = 0; j < double_bytes; j++) {
+
+					var double_byte = document.createElement("div");
+					double_byte.classList.add("double_byte");
+
+					for (var k = 0; k < 2; k++) {
+
+						var byte = document.createElement("div");
+						byte.classList.add("byte");
+
+						for (var l = 0; l < 8; l++) {
+							bits++;
+							var bit_container = document.createElement("span");
+							bit_container.addEventListener("click", bit_click);
+							bit_container.addEventListener("mousedown", function (e) {e.preventDefault();});
+							bit_container.classList.add("bit_container");
+							bit_container.title = "Bit " + (config.total_width - bits).toString(10);
+							byte.appendChild(bit_container);
+
+							var bit = document.createElement("div");
+							bit.classList.add("bit_label");
+							bit.classList.add("monospace");
+							bit_container.appendChild(bit);
+							bit_labels.push(bit);
+
+							var marker = document.createElement("div");
+							marker.classList.add("bit_marker");
+							bit_container.appendChild(marker);
+							bit_markers.push(marker);
+						}
+
+						double_byte.appendChild(byte);
+
+					}
+
+					quad_byte.appendChild(double_byte);
+				}
+
+				bits_container.appendChild(quad_byte);
+
+
+			}
+
+			bit_markers[0].classList.add("float_sign");
+
+			for (var i = 1; i < config.exp_width + 1; i++)
+				bit_markers[i].classList.add("float_exponent");
+
+			for (var i = config.exp_width + 1; i < config.total_width; i++)
+				bit_markers[i].classList.add("float_mantissa");
+		}
+
+		function setup() {
+			var url = window.location.href;
+			local = url.startsWith("file");
+			var address = url.split('/').pop();
+
+			var big_num;
+			var parsed_config;
+			if (address.startsWith("0x")) {
+				if (address.length - 2 == 16) {
+					var high = parseInt(address.substring(2, 10), 16) >>> 0;
+					var low = parseInt(address.substring(10, 18), 16) >>> 0;
+					big_num = BigNum.from_uint64(high, low);
+					parsed_config = fp64;
+				}
+				else if (address.length - 2 == 8) {
+					big_num = BigNum.from_uint32(parseInt(address.substring(2, 10), 16) >>> 0);
+					parsed_config = fp32;
+				}
+				else if (address.length - 2 == 4) {
+					big_num = BigNum.from_uint16(parseInt(address.substring(2, 6), 16) >>> 0);
+					parsed_config = fp16;
+				}
+			}else if (address.startsWith("b0x")) {
+				if (address.length - 3 == 4) {
+					big_num = BigNum.from_uint16(parseInt(address.substring(3, 7), 16) >>> 0);
+					parsed_config = bf16;
+				}
+			}
+			else if (typeof (Storage) !== "undefined") {
+
+				if (!local && localStorage.config_name && localStorage.hex_string_value) {
+					big_num = BigNum.from_string(localStorage.hex_string_value, 16);
+					parsed_config = string_to_config[localStorage.config_name];
+				}
+			}
+
+			if (parsed_config === undefined) {
+				parsed_config = fp32;
+				big_num = BigNum.from_uint32(0x44bf9400);
+			}
+
+			float = new Float(big_num, parsed_config);
+			set_config(parsed_config);
+
+			main_field.addEventListener("input", main_field_input);
+			main_field.addEventListener("keydown", main_field_enter);
+			main_field.addEventListener("focusout", main_field_enter);
+
+			for (var i = 0; i < mode_buttons.length; i++)
+				mode_buttons[i].addEventListener("click", mode_click);
+
+			var stop_timers = (function (e) {
+				clearInterval(hold_interval_id);
+				clearInterval(initial_hold_interval_id);
+			});
+
+			for (var i = 0; i < titles.length; i++) {
+				var column = i * 2 >= titles.length ? "1" : "0";
+				var column_div = document.getElementById("column" + column);
+				var name_div = document.createElement("div");
+
+				name_div.innerHTML = titles[i];
+				name_div.classList.add("field_title");
+				column_div.appendChild(name_div);
+
+				var input_container = document.createElement("div");
+				column_div.appendChild(input_container);
+
+				var input = document.createElement("input");
+				input.maxlength = 64;
+				input.addEventListener("input", field_input);
+				input.addEventListener("keydown", field_key);
+				input.addEventListener("focusout", field_key);
+				input.classList.add("field");
+				input.classList.add("monospace");
+				input_container.appendChild(input);
+				row_fields.push(input);
+
+				var button_container = document.createElement("div");
+				button_container.classList.add("button_container");
+				input_container.appendChild(button_container);
+
+				if (i != PERCENT_A_INDEX) {
+					var arrays = [plus_buttons, minus_buttons];
+					var classes = ["button_plus", "button_minus"];
+					var sign_classes = ["sign_plus", "sign_minus"];
+
+					for (var j = 0; j < 2; j++) {
+						var button = document.createElement("div");
+						button.classList.add("field_button");
+						button.classList.add("non_selectable");
+						button.classList.add(classes[j]);
+						button.addEventListener("click", plus_minus_click);
+						button.addEventListener("mousedown", plus_minus_mouse_down);
+						button.addEventListener("mouseout", function (e) { e.preventDefault(); });
+
+						var sign = document.createElement("div");
+						sign.classList.add(sign_classes[j]);
+						button.appendChild(sign);
+
+						button_container.appendChild(button);
+						arrays[j].push(button);
+					}
+				}
+			}
+
+			var stop_timers = function (e) {
+				clearInterval(hold_interval_id);
+				clearInterval(initial_hold_interval_id);
+			};
+
+			window.addEventListener('resize', function () {
+				adjust_main_field_text_size();
+				adjust_chart();
+			}, true);
+			document.addEventListener("mouseup", stop_timers);
+
+			row_fields[SIGN_INDEX].classList.add("float_sign");
+			row_fields[EXPONENT_INDEX].classList.add("float_exponent");
+			row_fields[MANTISSA_INDEX].classList.add("float_mantissa");
+
+			function genericTouchHandler(f) {
+				return function (e) {
+					if (e.touches.length == 1) {
+						if (f(e.touches[0])) {
+							e.preventDefault();
+							return false;
+						}
+					}
+				}
+			}
+
+			knob.onmousedown = knob_down;
+			knob.ontouchstart = genericTouchHandler(knob_down);
+
+			knob.onmousemove = knob_move;
+			knob.ontouchmove = genericTouchHandler(knob_move);
+
+			knob.onmouseup = knob_up;
+			knob.ontouchend = knob_up;
+
+			update_url = debounce(function () {
+
+				/* Throttle for Safari. */
+
+				if (!local && typeof (History) !== "undefined") {
+				if (config == bf16)
+					history.replaceState({}, "Float Exposed", "b0x" + zero_pad(float._big.toString(16), config.total_width / 4));
+				else
+					history.replaceState({}, "Float Exposed", "0x" + zero_pad(float._big.toString(16), config.total_width / 4));
+				}
+
+				if (typeof (Storage) !== "undefined") {
+					localStorage.config_name = config.name;
+					localStorage.hex_string_value = float._big.toString(16);
+				}
+			}, 350);
+
+			reload();
+
+			var iOS = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+
+			if (!iOS)
+				main_field.focus();
+		}
+
+
+		function Point(x, y) {
+			this.x = x || 0;
+			this.y = y || 0;
+		}
+
+		Point.prototype.x = null;
+		Point.prototype.y = null;
+		Point.prototype.add = function (v) {
+			return new Point(this.x + v.x, this.y + v.y);
+		};
+
+		Point.prototype.sub = function (v) {
+			return new Point(this.x - v.x, this.y - v.y);
+		};
+
+		Point.prototype.lenSq = function () {
+			return this.x * this.x + this.y * this.y;
+		};
+
+		Point.prototype.len = function () {
+			return Math.sqrt(this.lenSq());
+		};
+
+		Point.prototype.perp = function () {
+			return new Point(-this.y, this.x);
+		};
+
+		Point.prototype.scale = function (s) {
+			return new Point(this.x * s, this.y * s);
+		};
+
+		Point.prototype.norm = function () {
+			return this.scale(1.0 / this.len());
+		};
+
+		function cursor_knob_position_for_event(e) {
+			var rect = chart.getBoundingClientRect();
+
+			return new Point(e.clientX - rect.left, e.clientY - rect.top);
+		}
+
+		var dragsKnob = false;
+		var selectionOffset;
+
+
+		function knob_update(position) {
+
+			var mant_scale = Math.min(Math.max(0, position.x / chart.offsetWidth), 1);
+			mant_scale = Math.round(mant_scale * 4503599627370496.0); /* 1 << 52 */
+			var high = Math.round(mant_scale / 4294967296);
+			var low = mant_scale - high * 4294967296;
+			var mant = config.max_mant.mul(BigNum.from_uint64(high, low)).shr(52);
+			float.set_mant(mant);
+
+			var exp;
+			if (position.y < -12) {
+				exp = BigNum.zero();
+			} else if (position.y > chart.offsetHeight + 12) {
+				exp = config.max_exp;
+			} else {
+				var exp_scale = Math.min(Math.max(0, position.y / chart.offsetHeight), 1);
+				exp_scale *= (1 << 16);
+				exp = config.max_exp.sub(2).mul(BigNum.from_uint32(Math.round(exp_scale))).shr(16).add(1);
+			}
+
+			float.set_exp(exp);
+
+			reload();
+		}
+
+
+		function knob_down(e) {
+			var position = cursor_knob_position_for_event(e);
+			var knob_rect = knob.getBoundingClientRect();
+			var diff = new Point(e.clientX - knob_rect.left, e.clientY - knob_rect.top);
+
+			dragsKnob = true;
+			selectionOffset = diff;
+
+			window.addEventListener("mousemove", knob_move, false);
+			window.addEventListener("mouseup", knob_up, false);
+
+			e.preventDefault();
+			return true;
+		}
+
+		function knob_move(e) {
+			var position = cursor_knob_position_for_event(e);
+
+			if (dragsKnob) {
+				knob_update(position.sub(selectionOffset));
+				return true;
+			}
+		}
+
+		function knob_up(e) {
+			if (dragsKnob) {
+				window.removeEventListener("mousemove", knob_move, false);
+				window.removeEventListener("mouseup", knob_up, false);
+
+				dragsKnob = false;
+			}
+		}
+
+
+		function main_field_input() {
+			var value = Float.from_string(main_field.value, config);
+
+			if (!value)
+				main_field.classList.add("invalid_number");
+			else
+				main_field.classList.remove("invalid_number");
+
+			adjust_main_field_text_size();
+		}
+
+		function main_field_enter(e) {
+
+			if ((e.type !== "keydown" || e.key !== "Enter") && e.type !== "focusout")
+				return false;
+
+			var value = Float.from_string(main_field.value, config);
+			if (value)
+				float = value;
+
+			reload();
+		}
+
+
+
+		function field_is_valid(field, index) {
+
+			var value;
+			if (index === PERCENT_A_INDEX) {
+				return Float.from_percent_a_string(field.value, config) !== undefined;
+			}
+
+			value = BigNum.from_string(field.value, index == RAW_HEX_VALUE_INDEX ? 16 : 10);
+
+			if (!value)
+				return false;
+
+			if (BigNum.zero().cmp(value) > 0)
+				return false;
+
+			if (max_values[index].cmp(value) < 0)
+				return false;
+
+			return true;
+
+		}
+
+		function field_input(e) {
+			var field = e.target;
+			var index = row_fields.indexOf(field);
+
+			if (field_is_valid(field, index))
+				field.classList.remove("invalid_number");
+			else
+				field.classList.add("invalid_number");
+		}
+
+
+		function field_key(e) {
+			if ((e.type !== "keydown" || (e.keyCode != "38" && e.keyCode != "40" && e.key !== "Enter"))
+				&& e.type !== "focusout")
+				return false;
+
+			var field = e.target;
+			var index = row_fields.indexOf(field);
+
+			var valid = field_is_valid(field, index);
+			if (e.type === "keydown" && e.key === "Enter" && !valid)
+				return true;
+
+			if (e.type === "focusout" && !valid) {
+				reload();
+				return true;
+			}
+
+
+			if (index == PERCENT_A_INDEX) {
+				var val = Float.from_percent_a_string(field.value, config);
+				if (val) {
+					float = val;
+					reload();
+				}
+			}
+			else {
+				var value = BigNum.from_string(field.value, index == RAW_HEX_VALUE_INDEX ? 16 : 10);
+
+				if (!value)
+					return false;
+
+				if (e.keyCode == "38") {
+					value = value.add(1);
+				}
+				else if (e.keyCode == "40") {
+					value = value.sub(1);
+				}
+				set_value_at_index(value, index);
+			}
+		}
+
+
+		function plus_minus_button_delta_index(button) {
+			var index = plus_buttons.indexOf(button);
+			var delta = 1;
+			if (index == -1) {
+				index = minus_buttons.indexOf(button);
+
+				if (index == -1)
+					delta = 0;
+				else
+					delta = -1;
+			}
+
+			return { delta: delta, index: index };
+		}
+
+		function plus_minus_mouse_down(e) {
+			e.preventDefault();
+
+			var hold_delta_index = plus_minus_button_delta_index(e.target);
+			initial_hold_interval_id = setInterval((function fn() {
+
+				var times = 0;
+				hold_interval_id = setInterval((function fn() {
+					apply_delta_index(hold_delta_index);
+					times++;
+					if (times == 20) {
+						times = 0;
+						hold_delta_index.delta *= 16;
+					}
+				}), 50);
+				clearInterval(initial_hold_interval_id);
+			}), 500)
+		}
+
+		function plus_minus_click(e) {
+			apply_delta_index(plus_minus_button_delta_index(e.target));
+		}
+
+
+
+		function apply_delta_index(di) {
+
+			var value = BigNum.from_string(row_fields[di.index].value, di.index == RAW_HEX_VALUE_INDEX ? 16 : 10);
+
+			if (!value)
+				return false;
+
+			value = value.add(di.delta);
+
+			set_value_at_index(value, di.index);
+		}
+
+		function set_value_at_index(value, index) {
+
+			if (BigNum.zero().cmp(value) > 0)
+				value = BigNum.zero();
+
+			if (max_values[index].cmp(value) < 0)
+				value = max_values[index];
+
+			if (index == RAW_DECIMAL_VALUE_INDEX || index == RAW_HEX_VALUE_INDEX)
+				float.set_value(value);
+			else if (index == SIGN_INDEX) {
+				float.set_sign(value);
+			} else if (index == EXPONENT_INDEX) {
+				float.set_exp(value);
+			} else if (index == MANTISSA_INDEX) {
+				float.set_mant(value);
+			}
+
+			reload();
+		}
+
+		function bit_click(e) {
+			var index = bit_labels.indexOf(e.target);
+
+			if (index == -1)
+				return;
+
+			float.set_bit(config.total_width - 1 - index, !float.bit(config.total_width - 1 - index));
+
+			reload();
+		}
+
+		function mode_click(e) {
+			if (mode_buttons[0] === e.target)
+				set_config(fp16);
+			else if (mode_buttons[1] === e.target)
+				set_config(bf16);
+			else if (mode_buttons[2] === e.target)
+				set_config(fp32);
+			else if (mode_buttons[3] === e.target)
+				set_config(fp64);
+			reload();
+		}
+
+
+		function zero_pad(str, length) {
+			var zeroes_string = (new Array(length)).join("0");
+			var s = zeroes_string + str;
+			return s.substring(s.length - length);
+		}
+
+
+
+		function log2(x) {
+			var r = 0;
+
+			while (x >>= 1)
+				r++;
+
+			return r;
+		}
+
+		function ispow2(x) {
+			return ((x - 1) & x) == 0;
+		}
+
+		function make_uint_float(sign, exp, mant) {
+			return ((sign >>> 0) << 31 | exp << 23 | mant) >>> 0;
+		}
+
+
+
+
+
+		function mantissa_10_fraction_string(mant) {
+			if (mant.is_0())
+				return "0";
+
+			var res = mant.mul(config.mant_integer_scale);
+
+			var str = zero_pad(res.toString(), config.mant_width);
+
+			return trim_trailing_zeros(str);
+		}
+
+
+		function adjust_main_field_text_size() {
+
+			var measure_div = document.getElementById("measure_div");
+			var field_width = main_field.offsetWidth;
+			var strlen = main_field.value.length;
+			var font_size = parseFloat(window.getComputedStyle(measure_div, null).getPropertyValue('font-size').replace("px", ""));
+
+			var letter_width = measure_div.offsetWidth;
+			var string_width = letter_width * strlen;
+
+			var size = Math.floor(font_size * field_width / (strlen * letter_width)) + 2;
+			size = Math.max(Math.min(size, 50), 15);
+
+			main_field.style.fontSize = size + "px";
+		}
+
+		function adjust_chart() {
+			var top;
+
+			var rect = chart.getBoundingClientRect();
+			if (float.exp().is_0()) {
+				top = min_gutter.offsetTop;
+			} else if (float.exp().cmp(config.max_exp) == 0) {
+				top = max_gutter.offsetTop;
+			}
+			else {
+				var exp_percent = (float.exp().double_value() - 1) / (config.max_exp.double_value() - 2);
+
+				top = chart.offsetTop - 1 + (exp_percent * (rect.height + 1));
+			}
+
+			var mant_percent = float.mant().double_value() / config.max_mant.double_value();
+			var left = chart.offsetLeft + (mant_percent * (rect.width - 1));
+
+			knob.style.top = top + "px";
+			knob.style.left = left + "px";
+
+			var inset = 5;
+
+			exp_notch0.style.top = exp_notch1.style.top = (top - 1) + "px";
+			exp_notch0.style.left = "-1px";
+			exp_notch0.style.width = Math.max(0, left - inset + 1) + "px";
+			exp_notch1.style.left = Math.round(left + inset) + "px";
+			exp_notch1.style.width = Math.max(0, rect.width + 1 - Math.round(left + inset)) + "px";
+
+			mant_notch0.style.top = "-1px";
+			mant_notch0.style.left = mant_notch1.style.left = (left - 1) + "px";
+			mant_notch0.style.height = Math.max(0, top + 1 - inset) + "px";
+
+			mant_notch1.style.top = (top + inset) + "px";
+			mant_notch1.style.height = Math.max(0, max_gutter.offsetTop + 2 - top - inset) + "px";
+		}
+
+		function reload() {
+
+			main_field.value = float.to_string();
+
+			adjust_main_field_text_size();
+
+			document.getElementById("sign_2_component").innerHTML = float.sign().toString(2);
+			document.getElementById("exponent_2_component").innerHTML = zero_pad(float.exp().toString(2), config.exp_width);
+			document.getElementById("exponent_2_bias").innerHTML = zero_pad(float.bias().toString(2), config.exp_width);
+			document.getElementById("implicit_bit_2_component").innerHTML = float.implicit_bit().toString(2);
+			document.getElementById("mantissa_2_component").innerHTML = zero_pad(float.mant().toString(2), config.mant_width);
+
+			document.getElementById("sign_10_component").innerHTML = float.sign().is_0() ? "1" : "&minus;1";
+			document.getElementById("exponent_10_component").innerHTML = float.biased_exp().toString();
+			document.getElementById("implicit_bit_10_component").innerHTML = float.implicit_bit().toString(2);
+			document.getElementById("mantissa_10_component").innerHTML = mantissa_10_fraction_string(float.mant());
+
+
+			document.getElementById("exact_10").innerHTML = float.to_exact_string();
+
+			if (float.prev_next_delta_equal()) {
+				document.getElementById("next_prev_delta_container").classList.remove("hidden");
+				document.getElementById("next_delta_container").classList.add("hidden");
+				document.getElementById("prev_delta_container").classList.add("hidden");
+
+				document.getElementById("next_prev_delta").innerHTML = "&plusmn;" + float.next_delta_string();
+			}
+			else {
+				document.getElementById("next_prev_delta_container").classList.add("hidden");
+				document.getElementById("next_delta_container").classList.remove("hidden");
+				document.getElementById("prev_delta_container").classList.remove("hidden");
+
+				document.getElementById("next_delta").innerHTML = float.next_delta_string();
+				document.getElementById("prev_delta").innerHTML = float.prev_delta_string();
+			}
+
+
+			var components = document.getElementsByClassName("evaluation");
+			for (var i = 0; i < components.length; i++) {
+				components[i].style.opacity = float.exp().eq(max_values[EXPONENT_INDEX]) ? "0.2" : "1.0";
+			}
+
+			for (var i = 0; i < config.total_width; i++) {
+				var bit_label = bit_labels[i];
+				var bit = float.bit(config.total_width - 1 - i);
+				bit_label.innerHTML = bit;
+			}
+
+			var raw_values = [];
+			raw_values[SIGN_INDEX] = float.sign();
+			raw_values[EXPONENT_INDEX] = float.exp();
+			raw_values[MANTISSA_INDEX] = float.mant();
+			raw_values[RAW_HEX_VALUE_INDEX] = float.value();
+			raw_values[RAW_DECIMAL_VALUE_INDEX] = float.value();
+
+			row_fields[SIGN_INDEX].value = raw_values[SIGN_INDEX].toString(10);
+			row_fields[EXPONENT_INDEX].value = raw_values[EXPONENT_INDEX].toString(10);
+			row_fields[MANTISSA_INDEX].value = raw_values[MANTISSA_INDEX].toString(10);
+			row_fields[RAW_HEX_VALUE_INDEX].value = "0x" + raw_values[RAW_HEX_VALUE_INDEX].toString(16);
+			row_fields[RAW_DECIMAL_VALUE_INDEX].value = raw_values[RAW_DECIMAL_VALUE_INDEX].toString(10);
+			row_fields[PERCENT_A_INDEX].value = float.percent_a_string();
+
+
+			adjust_chart();
+
+
+			main_field.classList.remove("invalid_number");
+			for (var i = 0; i < row_fields.length; i++)
+				row_fields[i].classList.remove("invalid_number");
+
+			for (var i = 0; i < plus_buttons.length; i++) {
+				var value = raw_values[i];
+				if (value.eq(max_values[i]))
+					plus_buttons[i].classList.add("inactive_buton");
+				else
+					plus_buttons[i].classList.remove("inactive_buton");
+
+				if (value.is_0())
+					minus_buttons[i].classList.add("inactive_buton");
+				else
+					minus_buttons[i].classList.remove("inactive_buton");
+			}
+
+			update_url();
+		}
+
+		function debounce(func, wait, immediate) {
+			var timeout;
+
+			return function executedFunction() {
+				var context = this;
+				var args = arguments;
+
+				var later = function () {
+					timeout = null;
+					if (!immediate) func.apply(context, args);
+				};
+
+				var callNow = immediate && !timeout;
+
+				clearTimeout(timeout);
+
+				timeout = setTimeout(later, wait);
+
+				if (callNow) func.apply(context, args);
+			};
+		}
+
+	</script>
+</body>
+
+</html>

@@ -1,0 +1,662 @@
+
+html,body {
+height: 100%;
+width: 100%;
+margin:0;
+padding:0;
+color: rgba(25, 25, 25, 1.0);
+-webkit-overflow-scrolling:touch;
+}
+
+body {
+background: #F7F7F7;
+}
+
+#container {
+    min-height:100%;
+    position:relative;
+ }
+
+::selection {
+background: #d7d7d7;
+}
+
+.monospace {
+font-family: monospace;
+}
+
+input,
+input[type=text],
+input[type=email],
+input[type=password],
+textarea {
+    -webkit-appearance: none;
+}
+
+input {
+background-clip: padding-box;
+font-weight: bold;
+}
+
+.spacer {
+    height: 3px;
+    width: 80%;
+}
+
+.spacer_big {
+    height: 18px;
+    width: 80%;
+}
+
+
+
+.components_container {
+font-weight: bold;
+text-align: center;
+font-size: 20px;
+margin-top: 5px;
+margin-bottom: 15px;
+margin-left: auto;
+margin-right: auto;
+width: 85%;
+word-wrap: break-word;
+}
+
+
+#mode_section {
+    width: 100%;
+    text-align: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin: 0 auto;
+    max-width: 480px;
+}
+
+.mode_button {
+    display: inline-block;
+    text-align: center;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 16px;
+    width: 24%;
+    height: 30px;
+    line-height: 30px;
+    border: 1px solid #777;
+    cursor: pointer;
+    color: #505050;
+    margin: 0;
+    padding: 0;
+    margin-right: -1px;
+}
+
+.mode_button.left_round {
+    border-radius: 7px 0 0 7px;
+}
+
+.mode_button.right_round {
+    border-radius: 0 7px 7px 0;
+}
+
+.mode_button:hover{
+    background: #ddd;
+        cursor: pointer;
+}
+    
+.mode_button:active{
+    background: #ccc;
+}
+
+.mode_button.on {
+    background: #505050;
+    color: #F8F8F8;
+    border: 1px solid #505050;
+    transform: translateZ(1px);
+}
+
+
+.mode_button.on:hover{
+    background: #505050;
+    cursor: default;
+}
+    
+.mode_button.on:active{
+    background: #505050;
+}
+
+    
+
+
+#value_section {
+width: 100%;
+}
+
+#measure_div {
+font-size: 50px;
+margin:0;
+padding:0;
+position: absolute;
+top: -1000px;
+left: -1000px
+}
+
+#float_value_field {
+display: block;
+font-size: 50px;
+background: transparent;
+border: none;
+text-align: center;
+outline: none;
+padding: 0px;
+margin: 0 auto;
+display: block;
+width: 95%;
+height: 80px;
+min-height: 80px;
+}
+
+#float_value_field.invalid_number {
+color: rgba(25, 25, 25, 0.3);
+}
+
+.separator {
+width: 80%;
+max-width: 800px;
+margin: 10px auto;
+border-bottom: 1px solid #e7e7e7;
+}
+
+
+#slider_container {
+    position: relative;
+
+    width: 70%;
+    max-width: 720px;
+    height: 130px;
+    margin: 20px auto 10px auto;
+}
+
+.slider_gutter {
+    position: relative;
+width: 100%;
+height: 1px;
+background: #bbb;
+margin:0 auto;
+padding:0;
+}
+
+
+.slider_gutter:before {
+    content: '';
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    left:-1px;
+    top:-1px;
+    border-radius: 1px;
+    background: #F8F8F8;
+    border: 1px solid #bbb;
+    }
+
+.slider_gutter:after {
+    content: '';
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    right:-3px;
+    top:-1px;
+    border-radius: 1px;
+    background: #F8F8F8;
+    border: 1px solid #bbb;
+    }
+
+.chart_label {
+    position: absolute;
+    width:30px;
+    height:20px;
+    line-height: 20px;
+    margin:0;
+    padding:0;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 13px;
+    color: #888;
+}
+
+.slider_label {
+    left:-45px;
+    top:-10px;
+    text-align: right;
+}
+
+#mant_gutter_min {
+    left:-15px;
+    top:-30px;
+    text-align: center;
+}
+
+#mant_gutter_max {
+    width:80px;
+    right:-40px;
+    top:-30px;
+    text-align: center;
+}
+
+
+#chart {
+    width: 100%;
+    height:80px;
+    padding:0;
+    margin:0 auto;
+    border-left: 1px solid #bbb;
+    border-right: 1px solid #bbb;
+    background: #FBFBFB;
+}
+
+
+#slider_knob {
+    position: absolute;
+    display: inline-block;
+    left:200px;
+    top:0px;
+    width: 1px;
+    height: 1px;
+    cursor: move;
+}
+
+#slider_knob:before {
+    content: '';
+    position: absolute;
+    display: inline-block;
+    left:-10px;
+    top:-10px;
+    width: 5px;
+    height: 5px;
+    border-radius: 20px;
+    border: 8px solid #aaa;
+}
+
+
+
+#slider_knob:after {
+    content: '';
+    position: absolute;
+    display: inline-block;
+    left:-9px;
+    top:-9px;
+    width: 7px;
+    height: 7px;
+    border-radius: 11px;
+    border: 6px solid #eee;
+}
+
+
+
+.exp_notch {
+    content: '';
+    position: absolute;
+    display: inline-block;
+    height: 3px;
+    border-radius: 1px;
+    background: rgba(65, 186, 99, 1);
+}
+
+
+.mant_notch {
+    content: '';
+    position: absolute;
+    display: inline-block;
+    width: 3px;
+    border-radius: 1px;
+    background: rgba(87, 126, 199, 1.0);
+}
+
+
+
+#bits_section {
+text-align: center;
+}
+
+#bits_container {
+margin: 15px auto 15px auto;
+display: inline-block;
+z-index: 0;
+}
+
+#values {
+width: 100%;
+text-align: center;
+margin-top: -5px;
+}
+
+#column_container {
+margin: 0 auto 20px auto;
+padding: 0px;
+display: inline-block;
+width: 100%;
+}
+
+.column {
+display: inline-block;
+margin: 0px;
+padding: 0px 10px 0px 10px;
+max-width: 320px;
+}
+
+.bit_container {
+position: relative;
+}
+
+.non_selectable {
+-webkit-user-select: none;
+-moz-user-select: none;
+-khtml-user-select: none;
+-ms-user-select: none;
+}
+
+.bit_label {
+font-weight: bold;
+cursor: pointer;
+text-align: center;
+padding: 0;
+margin: 0;
+font-size: 24px;
+
+display: inline-block;
+width: 22px;
+}
+
+.bit_marker {
+width:18px;
+height:3px;
+border-radius: 1.5px;
+display: inline-block;
+position: absolute;
+left: 2px;
+top: 18px;
+}
+
+
+.double_byte {
+display: inline-block;
+padding: 0px;
+}
+
+.byte {
+display: inline-block;
+padding: 5px 3px;
+height: 28px;
+}
+
+.field {
+background-clip: padding-box;
+text-align: right;
+font-size: 20px;
+height: 25px;
+background: #FBFBFB;
+border-radius: 6px;
+border: 1px solid #ddd;
+outline: none;
+padding: 5px;
+color: rgba(25, 25, 25, 1.0);
+display: inline-block;
+margin: 0;
+width: calc(100% - 40px);
+}
+
+.field:focus {
+border: 1px solid rgba(0, 0, 0, 0.25);
+box-shadow:  0px 0px 2px 1px rgba(0, 0, 0, 0.25);
+}
+
+.field.invalid_number {
+color: rgba(25, 25, 25, 0.3);
+}
+
+.field_title {
+text-align: left;
+font-family: Helvetica, Arial, Sans-Serif;
+font-size: 15px;
+padding: 15px 4px 4px 4px;
+color: #888;
+font-weight: normal;
+}
+
+
+.button_container {
+display: inline-block;
+vertical-align:top;
+margin: 0px 0px;
+padding: 0;
+width: 24px;
+}
+
+.field_button {
+display: block;
+text-align: center;
+font-family: monospace;
+font-weight: bold;
+font-size: 11px;
+width: 13px;
+height: 13px;
+line-height: 13px;
+border-radius: 4px;
+border: 1px solid #d0d0d0;
+margin: 2px 3px 3px 3px;
+cursor: pointer;
+color: #888;
+position: relative;
+}
+
+
+.field_button:hover{
+background: #ddd;
+border: 1px solid #ccc;
+cursor: pointer;
+}
+    
+.field_button:active{
+background: #ccc;
+border: 1px solid #aaa;
+}
+
+.sign_plus, .sign_minus {
+    position: absolute;
+    width: 7px;
+    height: 1px;
+    left: 3px;
+    top: 6px;
+    background: #999;
+    pointer-events: none;
+}
+
+
+.sign_plus:after {
+    content: '';
+    position: absolute;
+    width: 1px;
+    height: 7px;
+    left: 3px;
+    top: -3px;
+    background: #999;
+}
+
+.inactive_buton > .sign_plus, .inactive_buton > .sign_minus , .inactive_buton > .sign_plus:after {
+    background: #ddd;
+}
+
+
+@media (pointer:coarse) {
+    .field_button:hover{
+        background: transparent;
+        }
+
+    .button_container {
+        width: 70px;
+        margin: 2px 1px;
+        }
+
+    .field_button {
+        margin: 1px 2px;
+        display: inline-block;
+        width: 29px;
+        height: 29px;
+        line-height: 29px;
+        border-radius: 6px;
+        font-size: 15px;
+    }
+
+    .button_minus {
+        position: relative;
+        left:1px;
+        float: left;
+    }
+
+    .button_plus {
+        position: relative;
+    }
+
+    .sign_plus, .sign_minus {
+        width: 9px;
+        height: 1px;
+        left: 10px;
+        top: 14px;
+    }
+    
+    .sign_plus:after {
+        width: 1px;
+        height: 9px;
+        left: 4px;
+        top: -4px;
+        background: #888;
+    }   
+
+    #slider_knob:before {
+        left:-16px;
+        top:-16px;
+        width: 5px;
+        height: 5px;
+        border-radius: 20px;
+        border: 14px solid #aaa;
+    }
+
+    #slider_knob:after {
+        left:-15px;
+        top:-15px;
+        width: 7px;
+        height: 7px;
+        border-radius: 20px;
+        border: 12px solid #eee;
+    }
+
+    .chart_label {
+        font-size: 14px;
+    }
+    
+    .slider_label {
+        left:-48px;
+    }
+
+    #mant_gutter_min {
+        top:-34px;
+    }
+    
+    #mant_gutter_max {
+        top:-34px;
+    }   
+
+    .field {
+        font-size: 20px;
+        width: calc(100% - 90px);
+    }    
+
+    .column {
+        max-width: 370px;
+    }
+}
+
+
+
+.field_button.inactive_buton, .field_button:active.inactive_buton 
+{
+background: transparent;
+color: #e7e7e7;
+border: 1px solid #e7e7e7;
+cursor: default;
+}
+
+.centered {
+text-align: center;
+}
+
+
+.bit_marker.float_sign {
+background: rgba(232, 62, 93, 1);
+}
+
+.float_sign {
+color: rgba(232, 62, 93, 1);
+}
+
+.float_sign.invalid_number {
+color: rgba(232, 62, 93, 0.3);
+}
+
+.bit_marker.float_exponent {
+background: rgba(65, 186, 99, 1);
+}
+
+
+.float_exponent {
+color: rgba(65, 186, 99, 1);
+}
+
+.float_exponent.invalid_number {
+color: rgba(65, 186, 99, 0.3);
+}
+
+
+.bit_marker.float_mantissa {
+background: rgba(87, 126, 199, 1.0);
+}
+
+.float_mantissa {
+color: rgba(87, 126, 199, 1.0);
+}
+
+.float_mantissa.invalid_number {
+color: rgba(87, 126, 199, 0.3);
+}
+
+#body {
+padding-bottom:80px;
+}
+
+#footer {
+margin: 0px auto;
+padding-bottom: 20px;
+text-align: center;
+font-family: Helvetica, Arial, Sans-Serif;
+font-size: 12px;
+color: #ccc;
+position: absolute;
+bottom: 0;
+height: 80px;
+width: 100%;
+bottom:0;left:0;right:0;height:30px;
+}
+
+
+#footer > a {
+color:#ccc;
+text-decoration:none;
+}
+    
+#footer > a:hover {
+color:#999;
+text-decoration:underline;
+}
+    
+
+.hidden {
+    display: none;
+}
